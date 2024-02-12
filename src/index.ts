@@ -1,20 +1,42 @@
-class User {
-  readonly #name: string;
-  readonly #age: number;
+type Some<T> = { tag: "some"; value: T };
+type None = { tag: "none" };
 
-  constructor(name: string, age: number) {
-    if (name === "") {
-      throw new Error("名前は空にできません！");
-    }
+type Option<T> = Some<T> | None;
 
-    this.#name = name;
-    this.#age = age;
+const isSome = <T>(obj: Option<T>): obj is Some<T> => obj.tag === "some";
+
+const printOption = <T>(obj: Option<T>) => {
+  if (isSome(obj)) {
+    console.log(obj.value);
   }
+};
 
-  getMessage(message: string) {
-    return `${this.#name} (${this.#age})「${message}」`;
+const mapOption = <T, U>(
+  obj: Option<T>,
+  callback: (param: T) => U
+): Option<U> => {
+  switch (obj.tag) {
+    case "some":
+      return {
+        tag: "some",
+        value: callback(obj.value),
+      };
+    case "none":
+      return {
+        tag: "none",
+      };
   }
-}
+};
 
-const uhyo = new User("uhyo", 26);
-console.log(uhyo.getMessage("こんにちは"));
+const doubleOption = (obj: Option<number>): Option<number> => {
+  return mapOption(obj, (x) => x * 2);
+};
+
+const num: Option<number> = { tag: "some", value: 10 };
+const nothing: Option<number> = { tag: "none" };
+
+printOption(num);
+printOption(nothing);
+
+console.log(doubleOption(num));
+console.log(doubleOption(nothing));
